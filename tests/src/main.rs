@@ -43,4 +43,23 @@ mod tests {
 
         assert!(pot.get_init_slice() == &[1, 2, 3, 4], "invalid contents");
     }
+
+    #[test]
+    fn popping() {
+        const SIZE: usize = 4;
+        let mut pot = FlowerPot::<i32, SIZE>::new();
+
+        [1, 2, 3, 4]
+            .into_iter()
+            .for_each(|number| pot.push(number).unwrap());
+
+        assert!(pot.pop().unwrap() == 4);
+        assert!(pot.pop().unwrap() == 3);
+        assert!(pot.pop().unwrap() == 2);
+        assert!(pot.pop().unwrap() == 1);
+
+        assert!(pot.pop().is_none());
+
+        assert!(pot.empty());
+    }
 }

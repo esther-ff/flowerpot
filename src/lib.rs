@@ -64,6 +64,23 @@ impl<T, const N: usize> FlowerPot<T, N> {
         Ok(())
     }
 
+    /// Pops an item from the `FlowerPot`.
+    /// returns `None` if the container is empty.
+    pub fn pop(&mut self) -> Option<T> {
+        if self.empty() {
+            return None;
+        }
+
+        self.pos -= 1;
+
+        let val = unsafe {
+            let maybe = &*(self.items.as_mut_ptr().add(self.pos));
+            maybe.assume_init_read()
+        };
+
+        Some(val)
+    }
+
     /// Obtains an immutable reference to an item at an specified index.
     /// returns `None` if that index is out of bounds.
     pub fn get(&self, index: usize) -> Option<&T> {
@@ -118,6 +135,21 @@ impl<T, const N: usize> FlowerPot<T, N> {
         // at index `0` and the last at `self.pos`.
         // therefore we are creating a reference to a slice of initialized memory only.
         unsafe { &*(ptr as *const [MaybeUninit<T>] as *const [T]) }
+    }
+
+    /// Obtains a mutable reference to the initialized part of the `FlowerPot`.
+    /// if `pos` is `0` then returns a reference to an empty slice.
+    pub fn get_init_slice_mut(&mut self) -> &mut [T] {
+        if self.pos == 0 {
+            return &mut [];
+        };
+
+        let ptr = &mut self.items[0..self.pos];
+
+        // SAFETY: `ptr` refers to a part of the slice ranging from the first element
+        // at index `0` and the last at `self.pos`.
+        // therefore we are creating a reference to a slice of initialized memory only.
+        unsafe { &mut *(ptr as *mut [MaybeUninit<T>] as *mut [T]) }
     }
 }
 
